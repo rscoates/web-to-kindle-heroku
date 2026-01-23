@@ -9,6 +9,7 @@ const PORT = process.env.PORT || 3000;
 // Cache management
 let cachedScreenshot = null;
 let cacheMinute = null;
+let pendingScreenshot = null;
 
 function getCurrentMinute() {
   const now = new Date();
@@ -118,12 +119,32 @@ express()
         return res.end(cachedScreenshot);
       }
 
-      console.log('Generating new screenshot');
-      const screenshot = await generateScreenshot();
-      
-      cachedScreenshot = screenshot;
-      cacheMinute = getCurrentMinute();
+      // Check if a screenshot generation is already in progress
+      if (pendingScreenshot) {
+        console.log('Waiting for in-progress screenshot generation');
+        const screenshot = await pendingScreenshot;
+        res.writeHead(200, { 
+          'Content-Type': 'image/png', 
+          'Content-Length': screenshot.length 
+        });
+        return res.end(screenshot);
+      }
 
+      // Start new screenshot generation
+      console.log('Generating new screenshot');
+      pendingScreenshot = generateScreenshot()
+        .then(screenshot => {
+          cachedScreenshot = screenshot;
+          cacheMinute = getCurrentMinute();
+          pendingScreenshot = null;
+          return screenshot;
+        })
+        .catch(err => {
+          pendingScreenshot = null;
+          throw err;
+        });
+
+      const screenshot = await pendingScreenshot;
       res.writeHead(200, { 
         'Content-Type': 'image/png', 
         'Content-Length': screenshot.length 
