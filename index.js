@@ -78,16 +78,12 @@ async function generateScreenshot() {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-blink-features=AutomationControlled'
-      ],
-      headless: 'new'
+        '--disable-blink-features=AutomationControlled',
+        '--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      ]
     });
     
     const page = await browser.newPage();
-    
-    // Set realistic user agent to avoid detection
-    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    
     await page.setViewport({ width: 600, height: 800 });
 
     page.on('requestfailed', r => console.log('FAILED', r.url(), r.failure()?.errorText));
