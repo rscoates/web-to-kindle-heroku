@@ -74,10 +74,20 @@ async function generateScreenshot() {
   try {
     browser = await puppeteer.launch({ 
       executablePath: '/usr/bin/chromium', 
-      args: ['--no-sandbox'] 
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-blink-features=AutomationControlled'
+      ],
+      headless: 'new'
     });
     
     const page = await browser.newPage();
+    
+    // Set realistic user agent to avoid detection
+    await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+    
     await page.setViewport({ width: 600, height: 800 });
 
     page.on('requestfailed', r => console.log('FAILED', r.url(), r.failure()?.errorText));
@@ -86,14 +96,14 @@ async function generateScreenshot() {
     page.on('console', msg => console.log('CONSOLE', msg.type(), msg.text()));
 
     const url = process.env.SCREENSHOT_URL || 'http://192.168.0.90:3004/page';
-    await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
+    await page.goto(url, { timeout: 60000, waitUntil: 'networkidle2' });
 
     await page.waitForSelector('a.weatherwidget-io', { timeout: 30000 });
     await page.waitForFunction(() => typeof window.__weatherwidget_init === 'function', { timeout: 30000 });
     await page.evaluate(() => window.__weatherwidget_init());
 
     await waitForWidget(page, 30000);
-    await page.waitForTimeout(300);
+    await page.waitForTimeout(2000);
     
     await page.screenshot({ path: '/tmp/screenshot.png' });
     await convert('/tmp/screenshot.png');
