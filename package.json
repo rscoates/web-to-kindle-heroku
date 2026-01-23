@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "description": "A service to create Kindle-ready web page screenshots",
   "engines": {
-    "node": "12.x"
+    "node": "18.x"
   },
   "main": "index.js",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "express": "^4.15.2",
-    "puppeteer": "^5.4.1"
+    "puppeteer": "^19.5.0"
   },
   "repository": {
     "type": "git",
