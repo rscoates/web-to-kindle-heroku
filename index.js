@@ -95,8 +95,9 @@ async function generateScreenshot() {
     page.on('pageerror', err => console.log('PAGEERR', err));
     page.on('console', msg => console.log('CONSOLE', msg.type(), msg.text()));
 
-    // Use internal page route by default
-    const url = process.env.SCREENSHOT_URL || `http://localhost:${PORT}/page`;
+    // Use internal page route by default (127.0.0.1 works better in Docker)
+    const url = process.env.SCREENSHOT_URL || `http://127.0.0.1:${PORT}/page`;
+    console.log('Navigating to:', url);
     await page.goto(url, { timeout: 60000, waitUntil: 'networkidle2' });
 
     await page.waitForSelector('a.weatherwidget-io', { timeout: 30000 });
@@ -115,21 +116,27 @@ async function generateScreenshot() {
   }
 }
 
+function getDate(){
+  const d = new Date();
+  const hr = d.getHours();
+  let min = d.getMinutes();
+  if (min < 10) {
+    min = "0" + min;
+  }
+  return `${hr}:${min}`;
+}
+
 express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'pug')
   // Page route - serves the dashboard HTML for screenshot
   .get('/page', async (req, res) => {
+    console.log('Received request for /page');
     try {
-      const d = new Date();
-      const hr = d.getHours();
-      let min = d.getMinutes();
-      if (min < 10) {
-        min = "0" + min;
-      }
-      const date = `${hr}:${min}`;
+      const date = getDate();
       const [trains, recycling] = await Promise.all([getTrains(), getRecycling()]);
+      console.log('Rendering page with data:', { date, trainsCount: trains.length });
       res.render('index', { trains, recycling, date });
     } catch (error) {
       console.error('Error fetching page data:', error.message);
