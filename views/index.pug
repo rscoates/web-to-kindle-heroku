@@ -1,0 +1,98 @@
+html
+  head
+    title= title
+    base(href="https://ec2-13-49-12-40.eu-north-1.compute.amazonaws.com/" target="_blank")
+    style.
+      body {
+        width: 600px;
+        overflow: hidden;
+        height: 800px;
+      }
+
+      .weather-widget .weather-widget-io {
+        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+        text-align: center;
+      }
+
+      .kindle-screen {
+        border: 1px;
+        border-color: black;
+        margin: 10px;
+        border-style: dotted;
+      }
+
+      .trains-widget {
+        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+        text-align: center;
+        padding-top: 10px;
+        font-size: 1.5em;
+        height: 331.5px;
+        margin: auto auto;
+      }
+
+      .trains-widget .title {
+        font-weight: bold;
+        font-size: 1.7em;
+      }
+
+      .trains-widget .trains-info {
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        padding: 0px 10px 10px 10px;
+      }
+
+      .trains-widget .departure {
+        width: 45%;
+      }
+
+      .trains-widget .arrival {
+        width: 45%;
+      }
+      
+      .trains-widget .train-buffer {
+        width: 10%;
+      }
+
+      .buffer {
+        height: 20px;
+      }
+
+      .recycling-widget {
+        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+        text-align: center;
+        padding-top: 10px;
+        font-size: 1.5em;
+        height: 331.5px;
+        margin: auto auto;
+      }
+
+      .emboldened {
+        font-weight: bold;
+      }
+  body
+    .wrapper
+      .weather-widget(style='height: 210px;')
+        a.weatherwidget-io(href="https://forecast7.com/en/51d51n0d30/ealing/" data-label_1="EALING" data-label_2="WEATHER TODAY" data-days="5")
+      .trains-widget
+        .trains-info 
+          .departure 
+            span.title West Ealing
+          .train-buffer
+          .arrival 
+            span.title TCR
+        each train in trains
+          .trains-info 
+            .departure 
+              .scheduled #{train.departureScheduled}
+              .actual #{train.departureDue}
+            .train-buffer
+            .arrival
+              .scheduled #{train.arrivalScheduled}
+              .actual #{train.arrivalDue}
+      .recycling-widget
+        h2 Next Collection
+        p.emboldened #{recycling.date} 
+        p #{recycling.types}
+        p #{date}
+    script !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');

@@ -1,7 +1,7 @@
 {
-  "name": "web-to-kindle-heroku",
-  "version": "0.1.0",
-  "description": "A service to create Kindle-ready web page screenshots",
+  "name": "web-to-kindle",
+  "version": "1.0.0",
+  "description": "A combined service for Kindle dashboard with weather, trains, recycling info and screenshot generation",
   "engines": {
     "node": "18.x"
   },
@@ -10,7 +10,10 @@
     "start": "node index.js"
   },
   "dependencies": {
-    "express": "^4.15.2",
+    "axios": "^1.7.2",
+    "date-fns": "^2.29.3",
+    "express": "^4.19.2",
+    "pug": "^3.0.3",
     "puppeteer": "^19.5.0"
   },
   "repository": {

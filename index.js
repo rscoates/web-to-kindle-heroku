@@ -4,6 +4,10 @@ const puppeteer = require('puppeteer');
 const execFile = require('child_process').execFile;
 const fs = require('fs');
 
+// Import kindle-backend modules
+const getTrains = require('./get_trains');
+const getRecycling = require('./get_recycling');
+
 const PORT = process.env.PORT || 3000;
 
 // Cache management
@@ -91,7 +95,8 @@ async function generateScreenshot() {
     page.on('pageerror', err => console.log('PAGEERR', err));
     page.on('console', msg => console.log('CONSOLE', msg.type(), msg.text()));
 
-    const url = process.env.SCREENSHOT_URL || 'http://192.168.0.90:3004/page';
+    // Use internal page route by default
+    const url = process.env.SCREENSHOT_URL || `http://localhost:${PORT}/page`;
     await page.goto(url, { timeout: 60000, waitUntil: 'networkidle2' });
 
     await page.waitForSelector('a.weatherwidget-io', { timeout: 30000 });
@@ -113,7 +118,25 @@ async function generateScreenshot() {
 express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
-  .set('view engine', 'ejs')
+  .set('view engine', 'pug')
+  // Page route - serves the dashboard HTML for screenshot
+  .get('/page', async (req, res) => {
+    try {
+      const d = new Date();
+      const hr = d.getHours();
+      let min = d.getMinutes();
+      if (min < 10) {
+        min = "0" + min;
+      }
+      const date = `${hr}:${min}`;
+      const [trains, recycling] = await Promise.all([getTrains(), getRecycling()]);
+      res.render('index', { trains, recycling, date });
+    } catch (error) {
+      console.error('Error fetching page data:', error.message);
+      res.status(500).send('An error occurred while loading the page');
+    }
+  })
+  // Screenshot route - returns Kindle-ready PNG
   .get('/', async (req, res) => {
     try {
       if (isCacheValid()) {

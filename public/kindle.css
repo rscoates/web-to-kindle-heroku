@@ -1,0 +1,64 @@
+body {
+  width: 600px;
+  overflow: hidden;
+  height: 800px;
+}
+
+.wrapper {
+  width: 600px;
+  height: 800px;
+  overflow: hidden;
+}
+
+.weather-widget .weather-widget-io {
+  font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+  text-align: center;
+}
+
+.kindle-screen {
+  border: 1px;
+  border-color: black;
+  margin: 10px;
+  border-style: dotted;
+}
+
+.trains-widget {
+  font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+  text-align: center;
+  padding-top: 5px;
+  font-size: 1.5em;
+  height: 331.5px;
+}
+
+.trains-widget .title {
+  font-weight: bold;
+  font-size: 1.7em;
+}
+
+.trains-widget .trains-info {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  padding: 0px 10px 10px 10px;
+}
+
+.trains-widget .departure {
+  width: 50%;
+}
+
+.trains-widget .arrival {
+  width: 50%;
+}
+
+.buffer {
+  height: 20px;
+}
+
+.recycling-widget {
+  font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
+  text-align: center;
+  margin: auto auto;
+  padding-top: 5px;
+  font-size: 1.5em;
+  height: 331.5px;
+}
