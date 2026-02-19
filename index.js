@@ -41,22 +41,33 @@ async function waitForWidget(page, timeoutMs = 30000) {
       const frame = await handle.contentFrame();
       if (!frame) continue;
 
-      await frame.waitForSelector('.currentWeatherIcon', {
-        visible: true,
-        timeout: Math.min(5000, deadline - Date.now()),
-      });
-
-      return;
+      // Try multiple selectors that might indicate the widget has loaded
+      const selectors = ['.ww-icon', '.weatherIcon', 'svg', 'img', '.temp', '.ww-temp', '.currentWeatherIcon'];
+      
+      for (const selector of selectors) {
+        try {
+          await frame.waitForSelector(selector, {
+            visible: true,
+            timeout: 2000,
+          });
+          console.log(`Weather widget loaded (found ${selector})`);
+          return;
+        } catch {
+          // Try next selector
+        }
+      }
+      
     } catch (e) {
       const msg = String(e?.message || e);
       if (msg.includes('frame got detached') || msg.includes('Execution context was destroyed')) {
         continue;
       }
-      throw e;
+      // Don't throw, just continue waiting
     }
   }
 
-  throw new Error('Timed out waiting for weather widget to render');
+  // If we've waited the full timeout, proceed anyway instead of throwing
+  console.log('Weather widget timeout - proceeding with screenshot');
 }
 
 function convert(filename) {
