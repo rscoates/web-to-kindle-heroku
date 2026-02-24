@@ -10,6 +10,8 @@ const getRecycling = require('./get_recycling');
 
 const PORT = process.env.PORT || 3000;
 
+const log = (...args) => log(new Date().toISOString(), ...args);
+
 // Cache management
 let cachedScreenshot = null;
 let cacheMinute = null;
@@ -50,7 +52,7 @@ async function waitForWidget(page, timeoutMs = 30000) {
             visible: true,
             timeout: 2000,
           });
-          console.log(`Weather widget loaded (found ${selector})`);
+          log(`Weather widget loaded (found ${selector})`);
           return;
         } catch {
           // Try next selector
@@ -67,7 +69,7 @@ async function waitForWidget(page, timeoutMs = 30000) {
   }
 
   // If we've waited the full timeout, proceed anyway instead of throwing
-  console.log('Weather widget timeout - proceeding with screenshot');
+  log('Weather widget timeout - proceeding with screenshot');
 }
 
 function convert(filename) {
@@ -101,14 +103,14 @@ async function generateScreenshot() {
     const page = await browser.newPage();
     await page.setViewport({ width: 600, height: 800 });
 
-    page.on('requestfailed', r => console.log('FAILED', r.url(), r.failure()?.errorText));
-    page.on('response', r => { if (r.status() >= 400) console.log('HTTP', r.status(), r.url()); });
-    page.on('pageerror', err => console.log('PAGEERR', err));
-    page.on('console', msg => console.log('CONSOLE', msg.type(), msg.text()));
+    page.on('requestfailed', r => log('FAILED', r.url(), r.failure()?.errorText));
+    page.on('response', r => { if (r.status() >= 400) log('HTTP', r.status(), r.url()); });
+    page.on('pageerror', err => log('PAGEERR', err));
+    page.on('console', msg => log('CONSOLE', msg.type(), msg.text()));
 
     // Use internal page route by default (127.0.0.1 works better in Docker)
     const url = process.env.SCREENSHOT_URL || `http://127.0.0.1:${PORT}/page`;
-    console.log('Navigating to:', url);
+    log('Navigating to:', url);
     await page.goto(url, { timeout: 60000, waitUntil: 'networkidle2' });
 
     await page.waitForSelector('a.weatherwidget-io', { timeout: 30000 });
@@ -143,11 +145,11 @@ express()
   .set('view engine', 'pug')
   // Page route - serves the dashboard HTML for screenshot
   .get('/page', async (req, res) => {
-    console.log('Received request for /page');
+    log('Received request for /page');
     try {
       const date = getDate();
       const [trains, recycling] = await Promise.all([getTrains(), getRecycling()]);
-      console.log('Rendering page with data:', { date, trainsCount: trains.length });
+      log('Rendering page with data:', { date, trainsCount: trains.length });
       res.render('index', { trains, recycling, date });
     } catch (error) {
       console.error('Error fetching page data:', error.message);
@@ -158,7 +160,7 @@ express()
   .get('/', async (req, res) => {
     try {
       if (isCacheValid()) {
-        console.log('Serving from cache');
+        log('Serving from cache');
         res.writeHead(200, { 
           'Content-Type': 'image/png', 
           'Content-Length': cachedScreenshot.length 
@@ -168,7 +170,7 @@ express()
 
       // Check if a screenshot generation is already in progress
       if (pendingScreenshot) {
-        console.log('Waiting for in-progress screenshot generation');
+        log('Waiting for in-progress screenshot generation');
         const screenshot = await pendingScreenshot;
         res.writeHead(200, { 
           'Content-Type': 'image/png', 
@@ -178,7 +180,7 @@ express()
       }
 
       // Start new screenshot generation
-      console.log('Generating new screenshot');
+      log('Generating new screenshot');
       pendingScreenshot = generateScreenshot()
         .then(screenshot => {
           cachedScreenshot = screenshot;
@@ -202,4 +204,4 @@ express()
       res.status(500).send('Screenshot failed');
     }
   })
-  .listen(PORT, () => console.log(`Listening on ${PORT}`));
+  .listen(PORT, () => log(`Listening on ${PORT}`));
