@@ -39,7 +39,7 @@ const organizeReminders = (reminders) => {
             return reminder
         })
         .filter((reminder) => reminder.nextDate >= today && reminder.nextDate <= nextWeek)
-        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .sort((a, b) => a.nextDate - b.nextDate)
         .slice(0, 5) // Limit to next 5 reminders
         .map(reminder => ({date: `${formatDate(reminder.nextDate)}`, text: `${reminder.title} ${reminder.contact.last_name}`}));
     return combineReminders(upcomingReminders);
@@ -53,7 +53,7 @@ const getReminders = async () => {
   const url = "http://192.168.0.90:8080/api";
 
 try {
-    const response = await fetch(`${url}/reminders`, {
+    const response = await fetch(`${url}/reminders?limit=100`, {
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json"
