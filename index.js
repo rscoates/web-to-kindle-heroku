@@ -3,14 +3,16 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const execFile = require('child_process').execFile;
 const fs = require('fs');
+require('dotenv').config();
 
 // Import kindle-backend modules
 const getTrains = require('./get_trains');
 const getRecycling = require('./get_recycling');
+const getReminders = require('./get_reminders');
 
 const PORT = process.env.PORT || 3000;
 
-const log = (...args) => log(new Date().toISOString(), ...args);
+const log = (...args) => console.log(new Date().toISOString(), ...args);
 
 // Cache management
 let cachedScreenshot = null;
@@ -148,9 +150,9 @@ express()
     log('Received request for /page');
     try {
       const date = getDate();
-      const [trains, recycling] = await Promise.all([getTrains(), getRecycling()]);
-      log('Rendering page with data:', { date, trainsCount: trains.length });
-      res.render('index', { trains, recycling, date });
+      const [trains, recycling, reminders] = await Promise.all([getTrains(), getRecycling(), getReminders()]);
+      log('Rendering page with data:', { date, trainsCount: trains.length, remindersCount: reminders.length });
+      res.render('index', { trains, recycling, reminders, date });
     } catch (error) {
       console.error('Error fetching page data:', error.message);
       res.status(500).send('An error occurred while loading the page');
