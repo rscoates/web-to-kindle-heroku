@@ -18,7 +18,7 @@ const getTrains = async () => {
     const data = response.data.data ?? []
     return data.filter((row) => {
       const departureTime = new Date()
-      const [hours, minutes] = row['departureDue'] === ON_TIME ? row['departureScheduled'].split(':') : row['departureDue']
+      const [hours, minutes] = row['departureDue'] === ON_TIME ? row['departureScheduled'].split(':') : row['departureDue'].split(':')
       departureTime.setHours(+hours)
       departureTime.setMinutes(+minutes)
       const duration = parseInt(row['duration'])
