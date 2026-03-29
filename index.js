@@ -3,7 +3,10 @@ const path = require('path');
 const puppeteer = require('puppeteer');
 const execFile = require('child_process').execFile;
 const fs = require('fs');
+const luxon = require('luxon');
 require('dotenv').config();
+
+const { DateTime } = luxon;
 
 // Import kindle-backend modules
 const getTrains = require('./get_trains');
@@ -12,7 +15,7 @@ const getReminders = require('./get_reminders');
 
 const PORT = process.env.PORT || 3000;
 
-const log = (...args) => console.log(new Date().toISOString(), ...args);
+const log = (...args) => console.log(DateTime.now().toISO(), ...args);
 
 // Cache management
 let cachedScreenshot = null;
@@ -20,12 +23,12 @@ let cacheMinute = null;
 let pendingScreenshot = null;
 
 function getCurrentMinute() {
-  const now = new Date();
-  return now.getFullYear() * 525600 + 
-         now.getMonth() * 44640 + 
-         now.getDate() * 1440 + 
-         now.getHours() * 60 + 
-         now.getMinutes();
+  const now = DateTime.now();
+  return now.year * 525600 + 
+         now.month * 44640 + 
+         now.day * 1440 + 
+         now.hour * 60 + 
+         now.minute;
 }
 
 function isCacheValid() {
@@ -132,9 +135,9 @@ async function generateScreenshot() {
 }
 
 function getDate(){
-  const d = new Date();
-  const hr = d.getHours();
-  let min = d.getMinutes();
+  const d = DateTime.now().setZone('Europe/London');
+  const hr = d.hour;
+  let min = d.minute;
   if (min < 10) {
     min = "0" + min;
   }
