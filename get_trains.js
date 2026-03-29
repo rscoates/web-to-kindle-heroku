@@ -4,7 +4,7 @@ const {DateTime} = require('luxon');
 const WEST_EALING = 'WEA';
 const TCR = 'TCR';
 const DIRECT_JOURNEY_MAX = 30;
-const TIME_NOW = DateTime.now().setZone('Europe/London');
+
 const TIME_TO_STATION_MINUTES = 11;
 const TIME_TO_STATION = TIME_TO_STATION_MINUTES * 60 * 1000;
 const ON_TIME = 'On time';
@@ -14,6 +14,7 @@ const destination = TCR
 const url = `https://departureboard-io-api-mj7fisk44q-nw.a.run.app/api/v1.0/getFormattedJourneyByCRS?sourceCRS=${source}&destCRS=${destination}`
 
 const getTrains = async () => {
+  const TIME_NOW = DateTime.now().setZone('Europe/London');
   try {
     const response = await axios.get(url)
     const data = response.data.data ?? []
