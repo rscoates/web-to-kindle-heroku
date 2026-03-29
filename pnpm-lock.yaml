@@ -20,6 +20,9 @@ importers:
       express:
         specifier: ^4.19.2
         version: 4.22.1
+      luxon:
+        specifier: ^3.7.2
+        version: 3.7.2
       pug:
         specifier: ^3.0.3
         version: 3.0.3
@@ -435,6 +438,10 @@ packages:
 
   lines-and-columns@1.2.4:
     resolution: {integrity: sha512-7ylylesZQ/PV29jhEDl3Ufjo6ZX7gCqJr5F7PKrqc93v7fzSymt1BpwEU8nAUXs8qzzvqhbjhK5QZg6Mt/HkBg==}
+
+  luxon@3.7.2:
+    resolution: {integrity: sha512-vtEhXh/gNjI9Yg1u4jX/0YVPMvxzHuGgCm6tC5kZyb08yjGWGnqAjGJvcXbqQR2P3MyMEFnRbpcdFS6PBcLqew==}
+    engines: {node: '>=12'}
 
   math-intrinsics@1.1.0:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
@@ -1216,6 +1223,8 @@ snapshots:
       promise: 7.3.1
 
   lines-and-columns@1.2.4: {}
+
+  luxon@3.7.2: {}
 
   math-intrinsics@1.1.0: {}
 
