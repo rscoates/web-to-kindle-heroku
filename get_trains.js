@@ -23,7 +23,7 @@ const getTrains = async () => {
       if (row['departureDue'] !== ON_TIME) {
         depatureTime = row['departureDue'];
       }
-      const departureDateTime = DateTime.fromFormat(depatureTime, 'HH:mm').setZone('Europe/London');
+      const departureDateTime = DateTime.fromFormat(depatureTime, 'HH:mm', { zone: 'Europe/London' });
       const timeToDeparture = departureDateTime.diff(TIME_NOW).as('minutes');
       const duration = DateTime.fromFormat(row['arrivalScheduled'], 'HH:mm').diff(DateTime.fromFormat(depatureTime, 'HH:mm')).as('minutes');
       console.log(`The time now is ${TIME_NOW.toFormat('HH:mm')}, the departure time is ${departureDateTime.toFormat('HH:mm')}, time to departure is ${timeToDeparture} minutes, and duration is ${duration} minutes`)
