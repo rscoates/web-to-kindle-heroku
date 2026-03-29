@@ -18,7 +18,6 @@ const getTrains = async () => {
     const response = await axios.get(url)
     const data = response.data.data ?? []
     return data.filter((row) => {
-      const departureTime = DateTime.now().setZone('Europe/London')
       // We only want to show trains that are more than 10 minutes away, and have a duration of less than 30 minutes (i.e. direct trains)
       let depatureTime = row['departureScheduled'];
       if (row['departureDue'] !== ON_TIME) {
@@ -28,7 +27,9 @@ const getTrains = async () => {
       const timeToDeparture = departureDateTime.diffNow().as('milliseconds');
       const duration = DateTime.fromFormat(row['arrivalScheduled'], 'HH:mm').diff(DateTime.fromFormat(depatureTime, 'HH:mm')).as('minutes');
       return timeToDeparture > TIME_TO_STATION && duration <= DIRECT_JOURNEY_MAX;
-    }).filter((_, idx) => idx < 4).map((row) => {
+    })
+    .filter((_, idx) => idx < 4)
+    .map((row) => {
       const {
         arrivalDue, arrivalScheduled,
         departureDue, departureScheduled
