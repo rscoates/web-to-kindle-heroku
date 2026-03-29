@@ -14,6 +14,9 @@ const combineReminders = (reminders) => {
 }
 
 const organizeReminders = (reminders) => {
+    if (reminders.length === 0) {
+      return ['None'];
+    }
     const todayNow = new Date();
     const today = new Date(todayNow.getFullYear(), todayNow.getMonth(), todayNow.getDate());
     const nextWeek = new Date();
