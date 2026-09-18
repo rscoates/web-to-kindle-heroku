@@ -7,6 +7,14 @@ const formatDate = (date) => {
     return date.toLocaleDateString("en-GB", options);
 }
 
+const formatTitle = (reminder) => {
+    const isBirthday = reminder.frequency_type === 'year' && reminder.title.includes('Birthday');
+    if (isBirthday) {
+        return `${reminder.title} ${reminder.contact.last_name}`;
+    }
+    return `${reminder.title}`;
+}
+
 const combineReminders = (reminders) => {
     const firstDate = reminders[0].date;
     const combinedText = reminders.filter((e) => e.date === firstDate).map(r => r.text).join(', ');
@@ -41,19 +49,19 @@ const organizeReminders = (reminders) => {
         .filter((reminder) => reminder.nextDate >= today && reminder.nextDate <= nextWeek)
         .sort((a, b) => a.nextDate - b.nextDate)
         .slice(0, 5) // Limit to next 5 reminders
-        .map(reminder => ({date: `${formatDate(reminder.nextDate)}`, text: `${reminder.title} ${reminder.contact.last_name}`}));
+        .map(reminder => ({date: `${formatDate(reminder.nextDate)}`, text: formatTitle(reminder)}));
     return combineReminders(upcomingReminders);
 }
+
+const monicaURL = "http://192.168.0.90:8080/api"
 
 const getReminders = async () => {
   if (!accessToken) {
     return []
   }
 
-  const url = "http://192.168.0.90:8080/api";
-
 try {
-    const response = await fetch(`${url}/reminders?limit=100`, {
+    const response = await fetch(`${monicaURL}/reminders?limit=100`, {
       headers: {
         "Authorization": `Bearer ${accessToken}`,
         "Content-Type": "application/json"
@@ -69,6 +77,35 @@ try {
     return organizeReminders(data.data || []);
   } catch (error) {
     console.error("Error fetching reminders:", error);
+    return [];
+  }
+}
+
+// Currently doesn't do anything with the tasks, but we can use it in the future if needed
+const getTasks = async () => {
+  if (!accessToken) {
+    return []
+  }
+
+  const url = monicaURL;
+
+try {
+    const response = await fetch(`${url}/tasks?limit=100`, {
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
+      }
+    });
+
+    if (!response.ok) {
+      console.error("Failed to fetch tasks:", response.statusText);
+      return [];
+    }
+
+    const data = await response.json();
+    return data.data;
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
     return [];
   }
 }
