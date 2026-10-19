@@ -79,7 +79,7 @@ async function waitForWidget(page, timeoutMs = 30000) {
 
 function convert(filename) {
   return new Promise((resolve, reject) => {
-    const args = [filename, '-gravity', 'center', '-extent', '600x800', '-colorspace', 'gray', '-depth', '8', filename];
+    const args = [filename, '-gravity', 'center', '-extent', '400x800', '-colorspace', 'gray', '-depth', '8', filename];
     execFile('convert', args, (error, stdout, stderr) => {
       if (error) {
         console.error({ error, stdout, stderr });
@@ -106,7 +106,7 @@ async function generateScreenshot() {
     });
     
     const page = await browser.newPage();
-    await page.setViewport({ width: 600, height: 800 });
+    await page.setViewport({ width: 400, height: 800 });
 
     page.on('requestfailed', r => log('FAILED', r.url(), r.failure()?.errorText));
     page.on('response', r => { if (r.status() >= 400) log('HTTP', r.status(), r.url()); });
