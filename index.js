@@ -9,7 +9,7 @@ require('dotenv').config();
 const { DateTime } = luxon;
 
 // Import kindle-backend modules
-const getTrains = require('./get_trains');
+const getTrains = require('./get_trains_huxley');
 const getRecycling = require('./get_recycling');
 const getReminders = require('./get_reminders');
 
