@@ -1,122 +1,41 @@
+doctype html
 html
   head
-    title= title
-    base(href="https://ec2-13-49-12-40.eu-north-1.compute.amazonaws.com/" target="_blank")
-    style.
-      body {
-        width: 480px;
-        margin: 0;
-        overflow: hidden;
-        height: 800px;
-      }
-
-      .weather-widget .weather-widget-io {
-        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
-        text-align: center;
-      }
-
-      .kindle-screen {
-        border: 1px;
-        border-color: black;
-        margin: 10px;
-        border-style: dotted;
-      }
-
-      .trains-widget {
-        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
-        text-align: center;
-        padding-top: 10px;
-        font-size: 1.5em;
-        margin: auto auto;
-      }
-
-      .trains-widget .title {
-        font-weight: bold;
-        font-size: 1.7em;
-      }
-
-      .trains-widget .trains-info {
-        width: 100%;
-        display: flex;
-        flex-direction: row;
-        padding: 0px 10px 10px 10px;
-      }
-
-      .trains-widget .departure {
-        width: 45%;
-      }
-
-      .trains-widget .arrival {
-        width: 45%;
-      }
-      
-      .trains-widget .train-buffer {
-        width: 10%;
-      }
-
-      .buffer {
-        height: 20px;
-      }
-
-      .bottom-wrapper {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
-        padding: 0px 10px 10px 10px;
-        margin-top: -20px;
-      }
-
-      .recycling-widget {
-        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
-        text-align: center;
-        padding-top: 10px;
-        font-size: 1.5em;
-        height: 201.5px;
-        margin: auto auto;
-        width: 50%;
-      }
-
-      .date-widget {
-        font-family: Tahoma,Arial,Verdana,Segoe,sans-serif;
-        text-align: center;
-        font-size: 1.5em;
-        margin: auto auto;
-        width: 50%;
-      }
-
-      .emboldened {
-        font-weight: bold;
-      }
+    title Kindle dashboard
+    meta(name="viewport" content="width=800, initial-scale=1")
+    style
+      include ../public/kindle.css
   body
     .wrapper
-      .weather-widget(style='height: 210px;')
-        a.weatherwidget-io(href="https://forecast7.com/en/51d51n0d30/ealing/" data-label_1="EALING" data-label_2="WEATHER TODAY" data-days="5")
-      .trains-widget
-        .trains-info 
-          .departure 
-            span.title WEaling
-          .train-buffer
-          .arrival 
-            span.title TCR
-        each train in trains
-          .trains-info 
-            .departure 
-              .scheduled #{train.departureScheduled}
-              .actual #{train.departureDue}
-            .train-buffer
-            .arrival
-              .scheduled #{train.arrivalScheduled}
-              .actual #{train.arrivalDue}
-      .bottom-wrapper
-        .recycling-widget
+      .weather-widget
+        a.weatherwidget-io(href="https://forecast7.com/en/51d51n0d30/ealing/" data-label_1="EALING" data-label_2="WEATHER TODAY" data-days="5" data-font="Arial" data-theme="pure")
+      .dashboard-content
+        .panel.trains-widget
+          h2 Trains
+          .trains-info.trains-heading
+            .departure West Ealing
+            .arrival TCR
+          each train in trains
+            .trains-info.train-row
+              .departure
+                .scheduled= train.departureScheduled
+                .actual= train.departureDue
+              .arrival
+                .scheduled= train.arrivalScheduled
+                .actual= train.arrivalDue
+          if !trains.length
+            p No upcoming trains
+        .panel.recycling-widget
           h2 Bins
-          p.emboldened #{recycling.date} 
-          p #{recycling.types}
-        .recycling-widget
+          p.emboldened= recycling.date
+          p= recycling.types
+        .panel.reminders-widget
           h2 Reminders
           each reminder in reminders
-            p.emboldened #{reminder.date}
-            p #{reminder.text}
-      .date-widget
-        p #{date}
+            .reminder
+              p.emboldened= reminder.date
+              p= reminder.text
+          if !reminders.length
+            p No upcoming reminders
+      .date-widget Updated #{date}
     script !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');

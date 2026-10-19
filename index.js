@@ -79,7 +79,7 @@ async function waitForWidget(page, timeoutMs = 30000) {
 
 function convert(filename) {
   return new Promise((resolve, reject) => {
-    const args = [filename, '-gravity', 'center', '-extent', '480x800', '-colorspace', 'gray', '-depth', '8', filename];
+    const args = [filename, '-gravity', 'center', '-extent', '800x480', '-colorspace', 'gray', '-depth', '8', filename];
     execFile('convert', args, (error, stdout, stderr) => {
       if (error) {
         console.error({ error, stdout, stderr });
@@ -106,7 +106,7 @@ async function generateScreenshot() {
     });
     
     const page = await browser.newPage();
-    await page.setViewport({ width: 480, height: 800, deviceScaleFactor: 1 });
+    await page.setViewport({ width: 800, height: 480, deviceScaleFactor: 1 });
 
     page.on('requestfailed', r => log('FAILED', r.url(), r.failure()?.errorText));
     page.on('response', r => { if (r.status() >= 400) log('HTTP', r.status(), r.url()); });
@@ -116,14 +116,21 @@ async function generateScreenshot() {
     // Use internal page route by default (127.0.0.1 works better in Docker)
     const url = process.env.SCREENSHOT_URL || `http://127.0.0.1:${PORT}/page`;
     log('Navigating to:', url);
-    await page.goto(url, { timeout: 60000, waitUntil: 'networkidle2' });
+    const response = await page.goto(url, { timeout: 60000, waitUntil: 'domcontentloaded' });
+    if (response && !response.ok()) {
+      throw new Error(`Dashboard page returned HTTP ${response.status()}: ${url}`);
+    }
 
-    await page.waitForSelector('a.weatherwidget-io', { timeout: 30000 });
-    await page.waitForFunction(() => typeof window.__weatherwidget_init === 'function', { timeout: 30000 });
-    await page.evaluate(() => window.__weatherwidget_init());
-
-    await waitForWidget(page, 30000);
-    await page.waitForTimeout(2000);
+    // The dashboard can still render when the external weather service is unavailable.
+    try {
+      await page.waitForSelector('a.weatherwidget-io', { timeout: 5000 });
+      await page.waitForFunction(() => typeof window.__weatherwidget_init === 'function', { timeout: 10000 });
+      await page.evaluate(() => window.__weatherwidget_init());
+      await waitForWidget(page, 10000);
+      await page.waitForTimeout(2000);
+    } catch (error) {
+      log('Weather unavailable - capturing dashboard:', error.message);
+    }
     
     await page.screenshot({ path: '/tmp/screenshot.png' });
     await convert('/tmp/screenshot.png');
