@@ -1,13 +1,10 @@
 const axios = require('axios')
 const { format } = require('date-fns')
+const { formatDate } = require('./utils')
 
 const convertDate = (dateString) => {
   const [day, month, year] = dateString.split('/');
   return new Date(`${year}-${month}-${day}T00:00:00`);
-}
-
-const formatDate = (date) => {
-  return format(date, 'EEEE, do MMMM');
 }
 
 const convertRecyclingType = (type) => {
