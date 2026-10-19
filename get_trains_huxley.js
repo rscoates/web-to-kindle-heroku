@@ -58,7 +58,7 @@ const getTrains = async () => {
         return timeToDeparture > TIME_TO_STATION_MINUTES
           && duration >= 0 && duration <= DIRECT_JOURNEY_MAX;
       })
-      .slice(0, 4);
+      .slice(0, 3);
   } catch (error) {
     console.error('Error fetching train data:', error.message);
     return [];

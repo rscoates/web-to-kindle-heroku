@@ -15,7 +15,7 @@ html
           .trains-info.trains-heading
             .departure West Ealing
             .arrival TCR
-          each train in trains
+          each train in trains.slice(0, 3)
             .trains-info.train-row
               .departure
                 .scheduled= train.departureScheduled
