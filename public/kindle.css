@@ -19,7 +19,12 @@ html, body {
 .weather-widget { overflow: hidden; }
 .weather-widget > .weatherwidget-io {
   display: block;
-  zoom: 1.15;
+}
+/* The weather script renders its forecast in an iframe beside the link. */
+.weather-widget iframe {
+  display: block;
+  width: 91.659% !important;
+  zoom: 1.0911875;
 }
 .dashboard-content {
   display: grid;
