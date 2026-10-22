@@ -1,3 +1,4 @@
+const { dailyCache } = require('./cache');
 const axios = require('axios')
 const { format } = require('date-fns')
 const { formatDate } = require('./utils')
@@ -23,8 +24,7 @@ const convertRecyclingType = (type) => {
 }
 
 const getRecycling = async () => {
-  try {
-    const response = await fetch("https://www.ealing.gov.uk/site/custom_scripts/WasteCollectionWS/home/FindCollection", {
+  const response = await fetch("https://www.ealing.gov.uk/site/custom_scripts/WasteCollectionWS/home/FindCollection", {
       "headers": {
       "accept": "*/*",
       "accept-language": "en-GB,en-US;q=0.9,en;q=0.8",
@@ -43,6 +43,7 @@ const getRecycling = async () => {
     "method": "POST"
   });
 
+  if (!response.ok) throw new Error(`Recycling request failed: ${response.status}`);
   const data = await response.json();
 
   const recyclingInfo = data['param2'].map((item) => {
@@ -60,10 +61,13 @@ const getRecycling = async () => {
       date: formatDate(nextCollections[0].date),
       types: nextCollections.map(e => e.type).map(convertRecyclingType).join(', ')
     }
-  } catch (error) {
-    console.error('Error fetching recycling data:', error.message)
-    return { date: 'Unknown', types: 'Unable to fetch recycling data' }
-  }
+
 };
 
-module.exports = getRecycling;
+const cachedRecycling = dailyCache(getRecycling);
+module.exports = async () => {
+  try { return await cachedRecycling(); } catch (error) {
+    console.error('Error fetching recycling data:', error.message);
+    return { date: 'Unknown', types: 'Unable to fetch recycling data' };
+  }
+};

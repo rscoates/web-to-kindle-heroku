@@ -1,3 +1,4 @@
+const { dailyCache } = require('./cache');
 
 const accessToken = process.env.MONICA_ACCESS_TOKEN;
 
@@ -16,6 +17,7 @@ const formatTitle = (reminder) => {
 }
 
 const combineReminders = (reminders) => {
+    if (!reminders.length) return [];
     const firstDate = reminders[0].date;
     const combinedText = reminders.filter((e) => e.date === firstDate).map(r => r.text).join(', ');
     return [{ date: firstDate, text: combinedText }];
@@ -60,25 +62,20 @@ const getReminders = async () => {
     return []
   }
 
-try {
-    const response = await fetch(`${monicaURL}/reminders?limit=100`, {
-      headers: {
-        "Authorization": `Bearer ${accessToken}`,
-        "Content-Type": "application/json"
-      }
-    });
-
-    if (!response.ok) {
-      console.error("Failed to fetch reminders:", response.statusText);
-      return [];
+  const response = await fetch(`${monicaURL}/reminders?limit=100`, {
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
     }
+  });
 
-    const data = await response.json();
-    return organizeReminders(data.data || []);
-  } catch (error) {
-    console.error("Error fetching reminders:", error);
-    return [];
+  if (!response.ok) {
+    throw new Error(`Reminders request failed: ${response.status}`);
   }
+
+  const data = await response.json();
+  return organizeReminders(data.data || []);
+
 }
 
 // Currently doesn't do anything with the tasks, but we can use it in the future if needed
@@ -110,4 +107,10 @@ try {
   }
 }
 
-module.exports = getReminders;
+const cachedReminders = dailyCache(getReminders);
+module.exports = async () => {
+  try { return await cachedReminders(); } catch (error) {
+    console.error('Error fetching reminders:', error.message);
+    return [];
+  }
+};
