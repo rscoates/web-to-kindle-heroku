@@ -160,9 +160,10 @@ express()
     log('Received request for /page');
     try {
       const date = getDate();
-      const [trains, recycling, reminders] = await Promise.all([getTrains(), getRecycling(), getReminders()]);
+      const [trainBoard, recycling, reminders] = await Promise.all([getTrains.getBoard(), getRecycling(), getReminders()]);
+      const trains = trainBoard.rows;
       log('Rendering page with data:', { date, trainsCount: trains.length, remindersCount: reminders.length });
-      res.render('index', { trains, recycling, reminders, date });
+      res.render('index', { trains, trainDiagnostics: trainBoard.diagnostics, recycling, reminders, date });
     } catch (error) {
       console.error('Error fetching page data:', error.message);
       res.status(500).send('An error occurred while loading the page');

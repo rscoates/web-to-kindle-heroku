@@ -23,8 +23,26 @@ html
               .arrival
                 .scheduled= train.arrivalScheduled
                 .actual= train.arrivalDue
-          if !trains.length
-            p No upcoming trains
+          if trainDiagnostics.status === 'error'
+            p Train data unavailable (API failure)
+          else if !trains.length
+            if trainDiagnostics.reason === 'no_matching_services'
+              p No trains match the journey filters
+            else
+              p No upcoming trains
+          details.train-diagnostics
+            summary Train status: #{trainDiagnostics.status}
+            p Checked: #{trainDiagnostics.checkedAt}
+            if trainDiagnostics.status === 'error'
+              p= trainDiagnostics.message
+              if trainDiagnostics.httpStatus
+                p HTTP status: #{trainDiagnostics.httpStatus}
+              if trainDiagnostics.code
+                p Error code: #{trainDiagnostics.code}
+            else
+              p API services: #{trainDiagnostics.servicesReceived}; displayed: #{trainDiagnostics.servicesDisplayed}
+              p Filters: departure over #{trainDiagnostics.minimumMinutesToDeparture} minutes away; journey up to #{trainDiagnostics.maximumJourneyMinutes} minutes
+          script#train-diagnostics-data(type="application/json")!= JSON.stringify(trainDiagnostics).replace(/</g, '\\u003c')
         .panel.recycling-widget
           h2 Bins
           p.emboldened= recycling.date
@@ -38,4 +56,5 @@ html
           if !reminders.length
             p No upcoming reminders
       .date-widget Updated #{date}
+    script(src="/train-diagnostics.js")
     script !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src='https://weatherwidget.io/js/widget.min.js';fjs.parentNode.insertBefore(js,fjs);}}(document,'script','weatherwidget-io-js');

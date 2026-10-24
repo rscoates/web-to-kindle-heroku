@@ -23,8 +23,15 @@ const parseTime = (time, reference) => {
 
 const getTrains = async () => {
   const now = DateTime.now().setZone(ZONE);
-  const response = await axios.get(url);
-  const services = response.data.trainServices ?? [];
+  const response = await axios.get(url, { timeout: 15000 });
+  const board = response.data;
+  if (!board || typeof board !== 'object' || Array.isArray(board)
+    || board.error || board.errors
+    || (!('trainServices' in board) && !board.locationName)
+    || (board.trainServices != null && !Array.isArray(board.trainServices))) {
+    throw new Error('Invalid train board response');
+  }
+  const services = board.trainServices ?? [];
 
   const rows = services
     .filter((service) => !service.isCancelled && !service.filterLocationCancelled)
@@ -63,7 +70,13 @@ const getTrains = async () => {
     const scheduled = parseTime(row.departureScheduled, now);
     return row.departureDue === ON_TIME ? scheduled : parseTime(row.departureDue, scheduled);
   });
-  return { rows, nextDeparture: departures.length
+  return { rows, diagnostics: {
+    status: rows.length ? 'ok' : 'empty',
+    checkedAt: DateTime.now().toISO(),
+    source, destination, servicesReceived: services.length, servicesDisplayed: rows.length,
+    reason: rows.length ? null : services.length ? 'no_matching_services' : 'no_services',
+    minimumMinutesToDeparture: TIME_TO_STATION_MINUTES, maximumJourneyMinutes: DIRECT_JOURNEY_MAX
+  }, nextDeparture: departures.length
     ? Math.min(...departures.map(time => time.toMillis())) : null };
 
 };
@@ -72,9 +85,22 @@ const cachedTrains = createCache(getTrains, (data, now) =>
   data.nextDeparture === null ? now.toMillis()
     : Math.max(now.toMillis(), data.nextDeparture - 30 * 60 * 1000));
 
-module.exports = async () => {
-  try { return (await cachedTrains()).rows; } catch (error) {
-    console.error('Error fetching train data:', error.message);
-    return [];
+async function getBoard() {
+  try {
+    return await cachedTrains();
+  } catch (error) {
+    const diagnostics = {
+      status: 'error', checkedAt: DateTime.now().toISO(), source, destination,
+      reason: 'api_failure', httpStatus: error.response?.status ?? null,
+      code: error.code ?? null,
+      message: error.response ? `Train API returned HTTP ${error.response.status}`
+        : error.code === 'ECONNABORTED' ? 'Train API request timed out'
+        : error.message === 'Invalid train board response' ? error.message : 'Train API request failed'
+    };
+    console.error('Train board unavailable:', diagnostics);
+    return { rows: [], diagnostics };
   }
-};
+}
+
+module.exports = async () => (await getBoard()).rows;
+module.exports.getBoard = getBoard;
