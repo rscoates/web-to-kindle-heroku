@@ -1,3 +1,5 @@
+// A dummy key keeps provider tests offline; never use a real credential here.
+process.env.RAIL_DATA_API_KEY = 'test-only';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { Settings, DateTime } = require('luxon');
@@ -41,7 +43,7 @@ test('trains pause until exactly 30 minutes before the earliest usable departure
     let calls = 0;
     const service = (std, arrival) => ({ std, etd: 'On time', subsequentCallingPoints: [{ callingPoint: [{ crs: 'TCR', st: arrival }] }] });
     axios.get = async () => { calls++; return { data: { trainServices: [service('01:00', '01:20'), service('00:30', '00:50')] } }; };
-    const getTrains = fresh('../get_trains_huxley');
+    const getTrains = fresh('../get_trains_raildata');
     assert.equal((await getTrains()).length, 2);
     clock('2026-10-22T23:59:59+01:00');
     await getTrains();
@@ -59,7 +61,7 @@ test('empty train boards are queried again rather than inventing a wake-up time'
   try {
     let calls = 0;
     axios.get = async () => { calls++; return { data: { trainServices: [] } }; };
-    const getTrains = fresh('../get_trains_huxley');
+    const getTrains = fresh('../get_trains_raildata');
     await getTrains(); await getTrains();
     assert.equal(calls, 2);
   } finally { axios.get = originalGet; }
@@ -122,7 +124,7 @@ test('train cache shares concurrent requests, retries failures and uses delayed 
       if (++calls === 1) throw Error('offline');
       return { data: { trainServices: [{ std: '05:00', etd: '05:15', subsequentCallingPoints: [{ callingPoint: [{ crs: 'TCR', st: '05:20' }] }] }] } };
     };
-    const getTrains = fresh('../get_trains_huxley');
+    const getTrains = fresh('../get_trains_raildata');
     assert.deepEqual(await getTrains(), []);
     await Promise.all([getTrains(), getTrains()]);
     assert.equal(calls, 2);

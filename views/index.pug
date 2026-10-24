@@ -24,7 +24,10 @@ html
                 .scheduled= train.arrivalScheduled
                 .actual= train.arrivalDue
           if trainDiagnostics.status === 'error'
-            p Train data unavailable (API failure)
+            if trainDiagnostics.reason === 'configuration_error'
+              p Train data unavailable (configuration error)
+            else
+              p Train data unavailable (API failure)
           else if !trains.length
             if trainDiagnostics.reason === 'no_matching_services'
               p No trains match the journey filters
@@ -32,6 +35,7 @@ html
               p No upcoming trains
           details.train-diagnostics
             summary Train status: #{trainDiagnostics.status}
+            p Provider: #{trainDiagnostics.provider}
             p Checked: #{trainDiagnostics.checkedAt}
             if trainDiagnostics.status === 'error'
               p= trainDiagnostics.message
@@ -43,6 +47,7 @@ html
               p API services: #{trainDiagnostics.servicesReceived}; displayed: #{trainDiagnostics.servicesDisplayed}
               p Filters: departure over #{trainDiagnostics.minimumMinutesToDeparture} minutes away; journey up to #{trainDiagnostics.maximumJourneyMinutes} minutes
           script#train-diagnostics-data(type="application/json")!= JSON.stringify(trainDiagnostics).replace(/</g, '\\u003c')
+          .train-attribution Data provided by National Rail
         .panel.recycling-widget
           h2 Bins
           p.emboldened= recycling.date
