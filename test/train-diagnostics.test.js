@@ -1,3 +1,5 @@
+// A dummy key keeps provider tests offline; never use a real credential here.
+process.env.RAIL_DATA_API_KEY = 'test-only';
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const axios = require('axios');
@@ -8,8 +10,8 @@ const vm = require('node:vm');
 const path = require('node:path');
 
 const freshBoard = () => {
-  delete require.cache[require.resolve('../get_trains_huxley')];
-  return require('../get_trains_huxley').getBoard;
+  delete require.cache[require.resolve('../get_trains_raildata')];
+  return require('../get_trains_raildata').getBoard;
 };
 
 test('board distinguishes HTTP/network failures, invalid responses, empty boards, filtered boards and trains', async () => {

@@ -53,3 +53,5 @@ p { margin: 0 0 10px; font-size: 18px; line-height: 1.35; overflow-wrap: anywher
 .train-diagnostics { font-size: 11px; margin-top: 4px; }
 .train-diagnostics[open] { max-height: 100px; overflow-y: auto; }
 .train-diagnostics p { font-size: 11px; margin: 3px 0; }
+
+.train-attribution { font-size: 10px; margin-top: 3px; }

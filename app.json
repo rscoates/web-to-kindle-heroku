@@ -14,6 +14,15 @@
     "SCREENSHOT_URL": {
       "description": "The URL to take a screenshot of. Of which to take a screenshot? Whatever, you get it",
       "value": "https://darksky.net/details/40.7127,-74.0059/2021-1-6/us12/en"
+    },
+    "RAIL_DATA_API_KEY": {
+      "description": "Rail Data Marketplace consumer key for the Live Departure Board public JSON product (server only).",
+      "required": true
+    },
+    "RAIL_DATA_BASE_URL": {
+      "description": "Base URL from the approved Live Departure Board product Specification tab, ending /LDBWS/api/20220120.",
+      "value": "https://api1.raildata.org.uk/1010-live-departure-board-dep1_2/LDBWS/api/20220120",
+      "required": false
     }
   }
 }
